@@ -141,39 +141,29 @@ function CountdownDigit({ value, label }) {
 export default function App() {
   const [time, setTime] = useState(getTimeLeft);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [hasEntered, setHasEntered] = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
     // Preload the clock sound
     audioRef.current = new Audio('/clock.mp3');
     audioRef.current.volume = 1.0;
-    
-    // Browsers strictly block audio until the user interacts with the page once.
-    // This silently unlocks the audio context the moment they click or tap anywhere.
-    const unlockAudio = () => {
-      if (audioRef.current) {
-        audioRef.current.play().then(() => {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }).catch(() => {});
-      }
-      document.removeEventListener('click', unlockAudio);
-      document.removeEventListener('touchstart', unlockAudio);
-      document.removeEventListener('keydown', unlockAudio);
-    };
-
-    document.addEventListener('click', unlockAudio, { once: true });
-    document.addEventListener('touchstart', unlockAudio, { once: true });
-    document.addEventListener('keydown', unlockAudio, { once: true });
-
-    return () => {
-      document.removeEventListener('click', unlockAudio);
-      document.removeEventListener('touchstart', unlockAudio);
-      document.removeEventListener('keydown', unlockAudio);
-    };
   }, []);
 
+  const handleEnter = () => {
+    setHasEntered(true);
+    // Unlocking audio context explicitly on this click
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }).catch(() => {});
+    }
+  };
+
   useEffect(() => {
+    if (!hasEntered) return;
+    
     const id = setInterval(() => {
       setTime(getTimeLeft());
       if (audioRef.current) {
@@ -185,11 +175,24 @@ export default function App() {
       }
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [hasEntered]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
   };
+
+  if (!hasEntered) {
+    return (
+      <div className="entry-overlay" onClick={handleEnter}>
+        <ParticleField />
+        <div className="entry-content">
+          <div className="entry-logo-glow" />
+          <h1 className="brand" style={{ marginBottom: '1rem' }}>skip<span className="gradient-text">/</span>years</h1>
+          <p className="entry-text">Tap anywhere to enter</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div onMouseMove={handleMouseMove}>

@@ -302,6 +302,59 @@ body {
 }
 
 
+/* ── Entry Overlay ──────────────────────────────────────────── */
+.entry-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.entry-content {
+  position: relative;
+  text-align: center;
+  z-index: 10;
+  animation: float 4s ease-in-out infinite alternate;
+}
+
+.entry-logo-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 150px; height: 150px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.3;
+  transform: translate(-50%, -50%);
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+.entry-text {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--text-secondary);
+  animation: textBlink 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pulseGlow {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.15; }
+  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.4; }
+}
+@keyframes textBlink {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
 /* ── About Section ──────────────────────────────────────────── */
 .about-section {
   position: relative;
