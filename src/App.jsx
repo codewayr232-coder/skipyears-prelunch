@@ -141,9 +141,49 @@ function CountdownDigit({ value, label }) {
 export default function App() {
   const [time, setTime] = useState(getTimeLeft);
   const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const audioRef = useRef(null);
 
   useEffect(() => {
-    const id = setInterval(() => setTime(getTimeLeft()), 1000);
+    // Preload the clock sound
+    audioRef.current = new Audio('/clock.mp3');
+    audioRef.current.volume = 1.0;
+    
+    // Browsers strictly block audio until the user interacts with the page once.
+    // This silently unlocks the audio context the moment they click or tap anywhere.
+    const unlockAudio = () => {
+      if (audioRef.current) {
+        audioRef.current.play().then(() => {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }).catch(() => {});
+      }
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+
+    document.addEventListener('click', unlockAudio, { once: true });
+    document.addEventListener('touchstart', unlockAudio, { once: true });
+    document.addEventListener('keydown', unlockAudio, { once: true });
+
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTime(getTimeLeft());
+      if (audioRef.current) {
+        // Cloning the node ensures that if the mp3 is slightly longer than 1s, 
+        // the next tick plays immediately without waiting or cutting off.
+        const tick = audioRef.current.cloneNode();
+        tick.volume = 1.0;
+        tick.play().catch(() => {});
+      }
+    }, 1000);
     return () => clearInterval(id);
   }, []);
 
