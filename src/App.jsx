@@ -144,38 +144,42 @@ export default function App() {
   const [hasEntered, setHasEntered] = useState(false);
   const audioRef = useRef(null);
 
+  // Preload audio on mount
   useEffect(() => {
-    // Preload the clock sound
     audioRef.current = new Audio('/clock.mp3');
     audioRef.current.volume = 1.0;
   }, []);
 
+  // Start the stable ticking interval once the user has entered
+  useEffect(() => {
+    if (!hasEntered) return;
+
+    const tick = () => {
+      setTime(getTimeLeft());
+      // Only play sound when the tab is actually visible
+      if (audioRef.current && !document.hidden) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+    };
+
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasEntered]);
+
   const handleEnter = () => {
-    setHasEntered(true);
-    // Unlocking audio context explicitly on this click
+    // Unlock audio context with this user gesture then immediately start
     if (audioRef.current) {
       audioRef.current.play().then(() => {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }).catch(() => {});
     }
+    setHasEntered(true);
   };
 
-  useEffect(() => {
-    if (!hasEntered) return;
-    
-    const id = setInterval(() => {
-      setTime(getTimeLeft());
-      if (audioRef.current) {
-        // Cloning the node ensures that if the mp3 is slightly longer than 1s, 
-        // the next tick plays immediately without waiting or cutting off.
-        const tick = audioRef.current.cloneNode();
-        tick.volume = 1.0;
-        tick.play().catch(() => {});
-      }
-    }, 1000);
-    return () => clearInterval(id);
-  }, [hasEntered]);
+
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
