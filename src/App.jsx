@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-// ── Launch date: 6 days from now ──────────────────────────────
-const LAUNCH_DATE = new Date('2026-04-07T21:00:00+05:30').getTime();
+// ── Launch date: 11 April 2026 ────────────────────────────────
+const LAUNCH_DATE = new Date('2026-04-11T11:00:00+05:30').getTime();
 
 function getTimeLeft() {
   const now = Date.now();
@@ -213,7 +213,7 @@ export default function App() {
         {/* ── Floating Badge ── */}
         <div className="badge animate-in delay-0">
           <span className="badge-dot" />
-          <span>Pre-Launch • Something Big is Coming</span>
+          <span>Launch • 11 April</span>
         </div>
 
         {/* ── Logo ── */}
